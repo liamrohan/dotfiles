@@ -240,3 +240,7 @@
 {"session_id":"019c8002-5d66-79e2-890c-874c95212ebe","ts":1771679831,"text":"fine. there will likely be file conflicts, if we replace an existing file that's already there, you need to rename it with a .bak and timestamp at the end of the file name."}
 {"session_id":"019c8002-5d66-79e2-890c-874c95212ebe","ts":1771680006,"text":"now, I need a script to install all my apps that correspond to my dotfiles. so I can just run this once, too.."}
 {"session_id":"019c8028-2c7c-7f20-a9a7-ddf1e1e1fac4","ts":1771683746,"text":"remove the under construction overlay again"}
+{"session_id":"019c80fd-4fd7-77b1-977f-90d203c76cbe","ts":1771690619,"text":"Put back my keyd config into my config folder"}
+{"session_id":"019c80fd-4fd7-77b1-977f-90d203c76cbe","ts":1771690666,"text":"I've accidentially rm -rf the folder in .config"}
+{"session_id":"019c80fd-4fd7-77b1-977f-90d203c76cbe","ts":1771690763,"text":"add keyd to my config"}
+{"session_id":"019c80fd-4fd7-77b1-977f-90d203c76cbe","ts":1771690808,"text":"actually undo what you just did"}
