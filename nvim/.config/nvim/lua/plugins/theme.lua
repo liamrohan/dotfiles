@@ -1,0 +1,1 @@
+/home/ldr-cavetroll/.config/omarchy/current/theme/neovim.lua
