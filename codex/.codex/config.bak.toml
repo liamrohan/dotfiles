@@ -1,0 +1,37 @@
+personality = "pragmatic"
+model = "gpt-5.3-codex"
+model_reasoning_effort = "high"
+[projects."/home/ldr-cavetroll/brisk/risk-lang"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/brisk/the-grid"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/brisk/risk-explorer"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/brisk/dashboard-test"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/brisk/web"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/tinker/openclaw"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/building/brisk"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/.config"]
+trust_level = "untrusted"
+
+[projects."/home/ldr-cavetroll/.local/bin"]
+trust_level = "trusted"
+
+[mcp_servers.figma]
+url = "https://mcp.figma.com/mcp"
+
+[features]
+shell_snapshot = true
+collab = true
+apps = true

@@ -1,0 +1,44 @@
+model = "gpt-5.3-codex"
+model_reasoning_effort = "high"
+tool_output_token_limit = 25000
+# Leave room for native compaction near the 272–273k context window.
+# Formula: 273000 - (tool_output_token_limit + 15000)
+# With tool_output_token_limit=25000 ⇒ 273000 - (25000 + 15000) = 233000
+model_auto_compact_token_limit = 233000
+web_search = 'live'
+[features]
+ghost_commit = false
+unified_exec = true
+apply_patch_freeform = true
+skills = true
+shell_snapshot = true
+
+[projects."/Users/steipete/Projects"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/.local/bin"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/building/brisk/web"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/tinker/openclaw"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/building/brisk/risk-lang"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/Work/enf"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/.config"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/tinker/omadot"]
+trust_level = "trusted"
+
+[projects."/home/ldr-cavetroll/.dotfiles"]
+trust_level = "trusted"
+
+[notice.model_migrations]
+"gpt-5.2-codex" = "gpt-5.3-codex"
