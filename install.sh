@@ -94,6 +94,7 @@ extract_conflict_targets() {
 
 backup_conflict_targets() {
   local out="$1"
+  local mode="${2:-apply}"
   local moved=0
   local rel=""
   local src=""
@@ -125,6 +126,13 @@ backup_conflict_targets() {
       backup="${src}.bak.${BACKUP_TIMESTAMP}.${n}"
       ((n++))
     done
+
+    if [[ "$mode" == "simulate" ]]; then
+      log "Would back up: $src -> $backup"
+      BACKED_UP+=("$backup")
+      moved=1
+      continue
+    fi
 
     if mv -- "$src" "$backup"; then
       log "Backed up: $src -> $backup"
@@ -206,6 +214,12 @@ run_stow_for_package() {
 
     if is_conflict_output "$output"; then
       if (( DRY_RUN == 1 )); then
+        if backup_conflict_targets "$output" "simulate"; then
+          log "Dry-run OK (simulated backups): $pkg"
+          INSTALLED+=("$pkg")
+          return 0
+        fi
+
         warn "Skipping '$pkg' due to conflict during preview."
         SKIPPED_CONFLICT+=("$pkg")
         printf '%s\n' "$output" >&2
@@ -334,7 +348,11 @@ main() {
   printf 'Skipped (excluded):    %d\n' "${#SKIPPED_EXCLUDED[@]}"
   printf 'Skipped (not found):   %d\n' "${#SKIPPED_NOT_FOUND[@]}"
   printf 'Failed (other):        %d\n' "${#FAILED[@]}"
-  printf 'Backed up targets:     %d\n' "${#BACKED_UP[@]}"
+  if (( DRY_RUN == 1 )); then
+    printf 'Backups planned:       %d\n' "${#BACKED_UP[@]}"
+  else
+    printf 'Backed up targets:     %d\n' "${#BACKED_UP[@]}"
+  fi
 
   if [[ ${#SKIPPED_CONFLICT[@]} -gt 0 ]]; then
     printf '\nConflicted packages:\n'
@@ -347,7 +365,11 @@ main() {
   fi
 
   if [[ ${#BACKED_UP[@]} -gt 0 ]]; then
-    printf '\nBackups created:\n'
+    if (( DRY_RUN == 1 )); then
+      printf '\nBackups planned (dry-run):\n'
+    else
+      printf '\nBackups created:\n'
+    fi
     printf '  - %s\n' "${BACKED_UP[@]}"
   fi
 
