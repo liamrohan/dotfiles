@@ -31,3 +31,5 @@ alias gpu-check-reset='ldr-gpu-passthrough info needs-reset && echo "⚠️  Res
 alias gpu-check-health='ldr-gpu-passthrough info gpu-health && echo "✅ Health: OK" || echo "❌ Health: ERROR"'
 alias gpu-check-persist='ldr-gpu-passthrough info is-persistent && echo "💾 Persistent: YES" || echo "⏳ Persistent: NO"'
 export LDR_VM_IGNORE_GPU_HEALTH=1
+
+. "$HOME/.local/share/../bin/env"

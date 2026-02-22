@@ -78,18 +78,36 @@ is_conflict_output() {
 
 extract_conflict_targets() {
   local out="$1"
-  printf '%s\n' "$out" | awk '
-    /existing target / {
-      line = $0
-      sub(/^.*existing target /, "", line)
-      sub(/ since .*/, "", line)
-      sub(/ is neither a link nor a directory.*/, "", line)
-      sub(/ is .*$/, "", line)
-      sub(/ owned by .*$/, "", line)
-      gsub(/^'\''|'\''$/, "", line)
-      if (line != "") print line
-    }
-  ' | awk '!seen[$0]++'
+  local line=""
+  local rel=""
+  while IFS= read -r line; do
+    rel=""
+
+    # Example: existing target .bashrc is neither a link nor a directory
+    if [[ "$line" =~ existing[[:space:]]target[[:space:]](.+)[[:space:]]is[[:space:]]neither[[:space:]]a[[:space:]]link[[:space:]]nor[[:space:]]a[[:space:]]directory ]]; then
+      rel="${BASH_REMATCH[1]}"
+    # Example: cannot stow ... over existing target .codex/auth.json since ...
+    elif [[ "$line" =~ existing[[:space:]]target[[:space:]](.+)[[:space:]]since[[:space:]].+$ ]]; then
+      rel="${BASH_REMATCH[1]}"
+    # Example: existing target is not owned by stow: .bashrc
+    elif [[ "$line" =~ existing[[:space:]]target[[:space:]]is[[:space:]][^:]+:[[:space:]](.+)$ ]]; then
+      rel="${BASH_REMATCH[1]}"
+    # Fallback: existing target <path> is ...
+    elif [[ "$line" =~ existing[[:space:]]target[[:space:]](.+)[[:space:]]is[[:space:]].+$ ]]; then
+      rel="${BASH_REMATCH[1]}"
+    fi
+
+    [[ -z "$rel" ]] && continue
+
+    rel="${rel#\'}"
+    rel="${rel%\'}"
+    rel="${rel%% => *}"
+    rel="${rel%% from *}"
+    rel="${rel%% since *}"
+    rel="${rel%.}"
+
+    [[ -n "$rel" ]] && printf '%s\n' "$rel"
+  done <<< "$out" | awk '!seen[$0]++'
 }
 
 backup_conflict_targets() {
@@ -202,6 +220,7 @@ run_stow_for_package() {
   local output=""
   local preview_attempt=0
   local install_attempt=0
+  local max_attempts=50
 
   base_args=(--dir "$REPO_DIR" --target "$TARGET_DIR")
   (( VERBOSE == 1 )) && base_args+=(-v)
@@ -226,8 +245,15 @@ run_stow_for_package() {
         return 0
       fi
 
-      if (( preview_attempt == 0 )) && backup_conflict_targets "$output"; then
-        preview_attempt=1
+      if (( preview_attempt >= max_attempts )); then
+        warn "Skipping '$pkg' after too many conflict retries in preview."
+        SKIPPED_CONFLICT+=("$pkg")
+        printf '%s\n' "$output" >&2
+        return 0
+      fi
+
+      if backup_conflict_targets "$output"; then
+        ((preview_attempt++))
         warn "Retesting '$pkg' after conflict backups."
         continue
       fi
@@ -245,7 +271,7 @@ run_stow_for_package() {
   done
 
   if (( DRY_RUN == 1 )); then
-    log "Dry-run OK: $pkg"
+    log "Dry-run OK (simulated backups): $pkg"
     INSTALLED+=("$pkg")
     return 0
   fi
@@ -256,8 +282,15 @@ run_stow_for_package() {
     fi
 
     if is_conflict_output "$output"; then
-      if (( install_attempt == 0 )) && backup_conflict_targets "$output"; then
-        install_attempt=1
+      if (( install_attempt >= max_attempts )); then
+        warn "Skipping '$pkg' after too many conflict retries in install."
+        SKIPPED_CONFLICT+=("$pkg")
+        printf '%s\n' "$output" >&2
+        return 0
+      fi
+
+      if backup_conflict_targets "$output"; then
+        ((install_attempt++))
         warn "Retrying '$pkg' after conflict backups."
         continue
       fi
